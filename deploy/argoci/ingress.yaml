@@ -1,0 +1,80 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: argo-issuer
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: your@email.com
+    privateKeySecretRef:
+      name: argo-issuer
+    solvers:
+    - http01:
+        ingress:
+           class: traefik-cert-manager
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argo-certificate
+  namespace: argo
+spec:
+  secretName: argo-crt-secret
+  dnsNames:
+    - workflows.argo.your.domain.com
+    - webhook.argo.your.domain.com
+  issuerRef:
+    name: argo-issuer
+    kind: Issuer
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: redirectscheme
+  namespace: argo
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingressroute-argo-redirect
+  namespace: argo
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`workflows.argo.your.domain.com`)
+      kind: Rule
+      services:
+        - name: argo-server
+          port: 2746
+      middlewares:
+        - name: redirectscheme
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingressroute-argo
+  namespace: argo
+  annotations:
+    cert-manager.io/issuer: argo-issuer
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`workflows.argo.your.domain.com`)
+      kind: Rule
+      services:
+        - name: argo-server
+          port: 2746
+    - match: Host(`webhook.argo.your.domain.com`)
+      kind: Rule
+      services:
+        - name: github-eventsource-svc
+          port: 12000
+  tls:
+    secretName: argo-crt-secret

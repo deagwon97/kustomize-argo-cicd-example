@@ -1,0 +1,46 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: app-name-staging
+bases:
+- ../production
+secretGenerator:
+  - name: app-name
+    behavior: replace
+    envs:
+    - 01nextjs.env
+patchesJson6902:
+  - target:
+      version: v1
+      kind: Namespace
+      name: base-namespace
+    patch: |
+      - op: replace
+        path: /metadata/name
+        value: app-name-staging
+  - target:
+      group: cert-manager.io
+      version: v1
+      kind: Certificate
+      name: app-name-certificate
+    patch: |
+      - op: replace
+        path: /spec/dnsNames/0
+        value: staging.your.domain.com
+  - target:
+      group: traefik.containo.us
+      version: v1alpha1
+      kind: IngressRoute
+      name: ingressroute-app-name-redirect
+    patch: |
+      - op: replace
+        path: /spec/routes/0/match
+        value: Host(`staging.your.domain.com`)
+  - target:
+      group: traefik.containo.us
+      version: v1alpha1
+      kind: IngressRoute
+      name: ingressroute-app-name
+    patch: |
+      - op: replace
+        path: /spec/routes/0/match
+        value: Host(`staging.your.domain.com`)

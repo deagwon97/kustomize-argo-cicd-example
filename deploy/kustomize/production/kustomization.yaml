@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: app-name
+metadata:
+  name: arbitrary
+generatorOptions:
+ disableNameSuffixHash: true
+## generate secret only first time
+## and comment out for ArgoCD
+# secretGenerator:
+#   - name: app-name
+#     envs:
+#     - 01nextjs.env
+#   - name: app-name-regcred
+#     files:
+#       - .dockerconfigjson=01dockerconfig.json
+#     type: kubernetes.io/dockerconfigjson
+commonLabels:
+  app: app-name
+resources:
+  - 00namespace.yaml
+  - 03serviceAccount.yaml
+  - 04deployment.yaml
+  - 05service.yaml
+  - 11issuer.yaml
+  - 12certificate.yaml
+  - 13middleWare.yaml
+  - 14ingressRouter.yaml
+  

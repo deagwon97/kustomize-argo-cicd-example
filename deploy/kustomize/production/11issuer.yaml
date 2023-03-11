@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: app-name-issuer
+  namespace: app-name
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: your@email.com
+    privateKeySecretRef:
+      name: app-name-issuer
+    solvers:
+    - http01:
+        ingress:
+           class: traefik-cert-manager

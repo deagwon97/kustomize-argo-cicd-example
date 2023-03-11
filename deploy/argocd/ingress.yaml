@@ -1,0 +1,83 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: argocd-issuer
+  namespace: argocd
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: your@email.com
+    privateKeySecretRef:
+      name: argocd-issuer
+    solvers:
+    - http01:
+        ingress:
+           class: traefik-cert-manager
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argocd-certificate
+  namespace: argocd
+spec:
+  secretName: argocd-crt-secret
+  dnsNames:
+    - cd.argo.your.domain.com
+  issuerRef:
+    name: argocd-issuer
+    kind: Issuer
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: redirectscheme
+  namespace: argocd
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingressroute-argocd-redirect
+  namespace: argocd
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`cd.argo.your.domain.com`)
+      kind: Rule
+      services:
+        - name: argocd-server
+          port: 80
+      middlewares:
+        - name: redirectscheme
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingressroute-argocd
+  namespace: argocd
+  annotations:
+    cert-manager.io/issuer: argocd-issuer
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`cd.argo.your.domain.com`)
+      priority: 10
+      services:
+        - name: argocd-server
+          port: 80
+    - kind: Rule
+      match: Host(`cd.argo.your.domain.com`) && Headers(`Content-Type`, `application/grpc`)
+      priority: 11
+      services:
+        - name: argocd-server
+          port: 80
+          scheme: h2c
+  tls:
+    secretName: argocd-crt-secret

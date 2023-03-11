@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: github
+spec:
+  service:
+    ports:
+      - name: github-webhook
+        port: 12000
+        targetPort: 12000
+  github:
+    github-webhook:
+      repositories:
+        - owner: gitusername
+          names:
+            - argo-events
+            - argo-workflows
+      webhook:
+        endpoint: /push
+        port: "12000"
+        method: POST
+        url: https://github.com/gitusername/app-name
+      events:
+        - "*"
+      insecure: false
+      active: true
+      contentType: json

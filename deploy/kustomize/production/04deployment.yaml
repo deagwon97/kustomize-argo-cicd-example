@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: app-name
+  name: app-name
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app-name
+  template:
+    metadata:
+      labels:
+        app: app-name
+    spec:
+      containers:
+      - name: app-name
+        image: harbor.your.domain.com/app-name/app-name:latest
+        imagePullPolicy: Always
+        ports:
+          - name: web
+            containerPort: 3000
+        envFrom:
+            - secretRef:
+                name: app-name
+      serviceAccountName: app-name-regcred 
+      imagePullSecrets:
+        - name: app-name-regcred 

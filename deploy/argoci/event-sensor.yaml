@@ -1,0 +1,92 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: github-webhook-sensor
+spec:
+  template:
+    serviceAccountName: operate-workflow-sa
+    container:
+      volumeMounts:
+        - mountPath: /git/argoproj
+          name: argoproj
+        - mountPath: /secret
+          name: sshkey
+        - mountPath: /etc/ssh
+          name: known-hosts
+    volumes:
+      - name: argoproj
+        emptyDir: {}
+      - name: sshkey
+        secret:
+          secretName: git-ssh
+      - name: known-hosts
+        secret:
+          secretName: git-known-hosts
+  dependencies:
+    - name: github-webhook-dep
+      eventSourceName: github
+      eventName: github-webhook
+  triggers:
+    - template:
+        name: github-workflow-trigger
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: build-deploy-
+              spec:
+                entrypoint: build-deploy
+                templates:
+                - name: build
+                  nodeSelector:
+                    gpu: nvidia
+                  container:
+                    image: gcr.io/kaniko-project/executor:latest
+                    command: ["/kaniko/executor"]
+                    args:
+                      - "--dockerfile=Dockerfile"
+                      - "--context=git://github.com/repo.git"
+                      - "--destination=harbor.your.domain.com/app-name/app-name:latest"
+                      - "--cache=true"
+                    envFrom:
+                    - secretRef:
+                        name: git-secret
+                    volumeMounts:
+                      - name: docker-config
+                        mountPath: /kaniko/.docker/
+                  volumes:
+                    - name: docker-config
+                      configMap:
+                        name: harbor-config
+                - name: deploy
+                  dependencies:
+                    - build
+                  container:
+                    image: bitnami/kubectl:latest
+                    command: ["kubectl"]
+                    args:
+                      - "rollout"
+                      - "restart"
+                      - "deployment"
+                      - "app-name"
+                      - "-n"
+                      - "app-name"
+                    volumeMounts:
+                      - name: kubeconfig
+                        mountPath: /.kube/
+                  volumes:
+                    - name: kubeconfig
+                      configMap:
+                        name: rollout-kubeconfig
+                - name: build-deploy
+                  steps:
+                  - - name: build
+                      template: build
+                  - - name: deploy
+                      template: deploy
+      retryStrategy:
+        steps: 3
+

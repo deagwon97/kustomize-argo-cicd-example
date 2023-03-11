@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+  app-name:
+    container_name: app-name
+    build:
+      context: ../
+      dockerfile: ./Dockerfile # context 경로 기준 상대경로
+      target: builder
+    volumes: # docker-comose 파일 경로 기준 상대 경로
+      - ../:/workdir
+    stdin_open: true # docker run -i
+    tty: true # docker run -t
+    entrypoint: /bin/sh

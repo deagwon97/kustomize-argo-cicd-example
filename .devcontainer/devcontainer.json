@@ -1,0 +1,15 @@
+{
+  "name": "app-name",
+  "dockerComposeFile": [
+    "./docker-compose.yml"
+  ],
+  "service": "app-name",
+  "shutdownAction": "stopCompose",
+  "settings": {
+    "settings what you want": "settings what you want"
+  },
+  "extensions": [
+    "extension what you want"
+  ],
+  "workspaceFolder": "/workdir"
+}

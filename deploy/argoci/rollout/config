@@ -1,0 +1,42 @@
+
+---
+apiVersion: v1
+kind: Config
+clusters:
+  - name: default
+    cluster:
+      certificate-authority-data: asdf
+      server: https://private-ip:6443
+contexts:
+  - name: argo-executor@default
+    context:
+      cluster: default
+      namespace: argo-ci
+      user: argo-executor
+users:
+  - name: argo-executor
+    user:
+      token: asdf
+current-context: argo-executor@default
+
+
+---
+apiVersion: v1
+kind: Config
+clusters:
+  - name: default
+    cluster:
+      certificate-authority-data: asdf
+      server: https://private-ip:6443
+contexts:
+  - name: argo-executor@default
+    context:
+      cluster: default
+      namespace: argo-ci
+      user: argo-executor
+users:
+  - name: argo-executor
+    user:
+      token: asdf
+current-context: argo-executor@default
+

@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: app-name-certificate
+  namespace: app-name
+spec:
+  secretName: app-name-crt-secret
+  dnsNames:
+    - your.domain.com
+  issuerRef:
+    name: app-name-issuer
+    kind: Issuer

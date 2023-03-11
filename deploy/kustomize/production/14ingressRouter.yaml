@@ -1,0 +1,35 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingressroute-app-name-redirect
+  namespace: app-name
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`your.domain.com`)
+      kind: Rule
+      services:
+        - name: app-name
+          port: 3000
+      middlewares:
+        - name: redirectscheme
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingressroute-app-name
+  namespace: app-name
+  annotations:
+    cert-manager.io/issuer: app-name-issuer
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`your.domain.com`)
+      kind: Rule
+      services:
+        - name: app-name
+          port: 3000
+  tls:
+    secretName: app-name-crt-secret

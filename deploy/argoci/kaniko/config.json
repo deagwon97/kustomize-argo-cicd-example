@@ -1,0 +1,7 @@
+{
+  "auths": {
+    "https://harbor.your.domain.com": {
+      "auth": ""
+    }
+  }
+}

@@ -1,0 +1,60 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argo-executor-role
+  namespace: argo-ci
+  # Role 은 고유한 namespace를 갖는다.
+  # ClusterRole은 namespace없이 하나의 cluster 범위 내에서 동작한다.
+rules:
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflows
+      - workflowtemplates
+      - cronworkflows
+      - eventsources
+      - sensors
+    verbs: 
+      - create
+      - delete
+      - patch
+      - list
+      - get
+      - watch
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata: 
+  name: argo-executor
+  namespace: argo-ci
+  # RoleBinding 및 ClusterRoleBinding은 subject로
+  # Groups, Users, ServiceAccounts에 연결될 수 있다.
+---
+apiVersion: rbac.authorization.k8s.io/v1
+# This role binding allows "jane" to read pods in the "default" namespace.
+# You need to already have a Role named "pod-reader" in that namespace.
+kind: RoleBinding
+metadata:
+  name: argo-executor-bind
+  namespace: argo-ci
+  # RoleBinding은 고유한 namespace를 갖는다.
+  # 동일한 namespace 내의 Role을 참조하거나, ClusterRole을 참조할 수 있다.
+subjects:
+# You can specify more than one "subject"
+- kind: ServiceAccount
+  name: argo-executor # "name" is case sensitive
+  namespace: argo-ci
+roleRef:
+  # "roleRef" specifies the binding to a Role / ClusterRole
+  kind: Role #this must be Role or ClusterRole
+  name: argo-executor-role # this must match the name of the Role or ClusterRole you wish to bind to
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: argo-executor.service-account-token
+  namespace: argo-ci
+  annotations:
+    kubernetes.io/service-account.name: argo-executor
+type: kubernetes.io/service-account-token
