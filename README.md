@@ -1,4 +1,4 @@
-# Argo Workflow와 Argo CD를 이용한 CI/CD 에제
+# Argo Workflow와 Argo CD를 이용한 CI/CD 예제
 
 ## Argo Workflows & Argo Events
 <div align="center">
