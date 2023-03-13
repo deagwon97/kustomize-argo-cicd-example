@@ -166,8 +166,8 @@ resources:
   - namespace.yaml # namespace 생성
   - https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
   - ingress.yaml # dashboard를 외부에 배포하기위한 ingress 및 certificate, issuer 설정
-	- repository.yaml # Argocd의 Application에서 사용되는 github repository를 생성하는 yaml
-	- application.yaml # Argocd의 Application을 생성하는 yaml
+  - repository.yaml # Argocd의 Application에서 사용되는 github repository를 생성하는 yaml
+  - application.yaml # Argocd의 Application을 생성하는 yaml
 patchesStrategicMerge:
   - argocd-cmd-params-cm-patch.yml # argocd 생성 파라미터에서 server.insecure: "true" 으로 설정
 ```
