@@ -20,20 +20,22 @@ resources:
   - ingress.yaml
 patchesStrategicMerge:
   - argo-patch.yaml
-secretGenerator:
-  - name: git-secret
-    envs:
-    - kaniko/git-secret
-  - name: git-ssh
-    files:
-      - .ssh/id_rsa
-  - name: git-known-hosts
-    files:
-      - .ssh/known_hosts
-configMapGenerator:
-  - name: harbor-config
-    files:
-      - kaniko/config.json
-  - name: rollout-kubeconfig
-    files:
-      - rollout/config
+## generate secret and config only first time
+## and comment out for ArgoCD
+# secretGenerator:
+#   - name: git-secret
+#     envs:
+#     - kaniko/git-secret
+#   - name: git-ssh
+#     files:
+#       - .ssh/id_rsa
+#   - name: git-known-hosts
+#     files:
+#       - .ssh/known_hosts
+# configMapGenerator:
+#   - name: harbor-config
+#     files:
+#       - kaniko/config.json
+#   - name: rollout-kubeconfig
+#     files:
+#       - rollout/config

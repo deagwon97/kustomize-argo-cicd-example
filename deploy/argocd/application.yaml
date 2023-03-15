@@ -13,3 +13,36 @@ spec:
     server: 'https://kubernetes.default.svc'
     namespace: app-name
   syncPolicy: {}
+
+---
+kind: Application
+apiVersion: argoproj.io/v1alpha1
+metadata:
+  name: app-name-argoci
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/user/app-name'
+    path: deploy/argoci
+    targetRevision: HEAD
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: app-name
+  syncPolicy: {}
+---
+kind: Application
+apiVersion: argoproj.io/v1alpha1
+metadata:
+  name: app-name-argocd
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/user/app-name'
+    path: deploy/argocd
+    targetRevision: HEAD
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: app-name
+  syncPolicy: {}
