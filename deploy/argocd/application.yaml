@@ -12,7 +12,8 @@ spec:
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: app-name
-  syncPolicy: {}
+  syncPolicy:
+    automated: {}
 
 ---
 kind: Application
@@ -29,7 +30,8 @@ spec:
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: app-name
-  syncPolicy: {}
+  syncPolicy: 
+    automated: {}
 ---
 kind: Application
 apiVersion: argoproj.io/v1alpha1
@@ -45,4 +47,5 @@ spec:
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: app-name
-  syncPolicy: {}
+  syncPolicy: 
+    automated: {}
